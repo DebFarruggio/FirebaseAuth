@@ -14,10 +14,11 @@ class SearchViewModel : ViewModel(){
 
 
     fun searchBooks(query: String) {
-        val lowerCaseQuery = query.trim().lowercase() // Converti la query in minuscolo
+        val lowerCaseQuery = query.trim().lowercase() // Converte la query in minuscolo
 
         FirebaseFirestore.getInstance().collection("books")
-            .whereEqualTo("titleLower", lowerCaseQuery) // Cerca nel campo in minuscolo
+            .whereGreaterThanOrEqualTo("titleLower", lowerCaseQuery)
+            .whereLessThanOrEqualTo("titleLower", lowerCaseQuery + "\uf8ff")
             .get()
             .addOnSuccessListener { result ->
                 val booksList = result.toObjects(Book::class.java)
