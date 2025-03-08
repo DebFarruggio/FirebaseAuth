@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FirebaseAuth</string>
+    <string name="item_entry_title">Add Item</string>
+</resources>
