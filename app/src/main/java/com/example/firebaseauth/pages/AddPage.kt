@@ -8,13 +8,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,15 +49,16 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
         mutableStateOf("")
     }
 
-    //var mExpanded by remember { mutableStateOf(false) }
+    val bookTypes = listOf("Adventure", "Classics", "Crime", "Folk", "Fantasy", "Historical", "Horror", "Literary fiction", "Mystery", "Poetry", "Plays",
+        "Romance",
+        "Science fiction",
+        "Short stories",
+        "Thrillers",
+        "War", "Women’s fiction ", "Young adult") // Opzioni del menù
+    var expanded by remember { mutableStateOf(false) } // Controlla se il menù è aperto
 
-    // Create a list of cities
-    /*val mTypes = listOf("Adventure", "Classics", "Crime", "Folk", "Fantasy", "Historical", "Horror", "Literary fiction", "Mystery", "Poetry", "Plays",
-            "Romance",
-            "Science fiction",
-            "Short stories",
-            "Thrillers",
-            "War", "Women’s fiction ", "Young adult")*/
+    var selectedType by remember { mutableStateOf(bookTypes.first()) }
+
 
     // Create a string value to store the selected city
     /*var mSelectedText by remember { mutableStateOf("") }
@@ -105,18 +114,39 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextField(
-            value = type.value,
-            onValueChange = {
-                type.value = it
-            },
-            placeholder = { Text(text = "Enter the type of the book") },
-            textStyle = TextStyle(color = Color.Black, fontSize = 15.sp),
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            TextField(
+                value = selectedType,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Select book type") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                },
+                modifier = Modifier.menuAnchor() // Necessario per il posizionamento corretto del menu
+            )
 
-            // on below line we are adding
-            // single line to it.
-            singleLine = true,
-        )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                bookTypes.forEach { type ->
+                    DropdownMenuItem(
+                        text = { Text(type) },
+                        onClick = {
+                            selectedType = type
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -128,7 +158,7 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
                 } else if (TextUtils.isEmpty(author.value.toString())) {
                     Toast.makeText(context, "Please enter author", Toast.LENGTH_SHORT)
                         .show()
-                } else if (TextUtils.isEmpty(type.value.toString())) {
+                } else if (TextUtils.isEmpty(selectedType.toString())) {
                     Toast.makeText(context, "Please enter type", Toast.LENGTH_SHORT)
                         .show()
                 } else {
@@ -137,7 +167,7 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
                     addDataToFirebase(
                         title.value,
                         author.value,
-                        type.value, context
+                        selectedType, context
                     )
                 }
             },
