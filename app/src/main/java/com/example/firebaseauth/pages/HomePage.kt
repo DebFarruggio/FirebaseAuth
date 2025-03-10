@@ -55,6 +55,14 @@ import com.example.firebaseauth.viewmodel.SearchViewModel
 import androidx.compose.material3.MaterialTheme
 import  androidx.compose.foundation.layout.size
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import  androidx.compose.foundation.clickable
+
+
+
 
 
 
@@ -73,6 +81,12 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val focusManager = LocalFocusManager.current
 
     val searchFocusRequester = remember { FocusRequester() }
+
+    var selectedGenre by remember { mutableStateOf<String?>(null) }
+
+    val genres = listOf("Horror", "Mistery", "Fantasy", "Thriller", "Romance")
+    val books = listOf("Book 1", "Book 2", "Book 3", "Book 4")
+
 
     val navItemList = listOf(
         NavItem("Home", Icons.Default.Home),
@@ -153,8 +167,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         onSearch = {
                             Log.d("SearchPage", "Ricerca avviata con query: $query")
                             viewModel.searchBooks(query)
-                            keyboardController?.hide() // Nasconde la tastiera
-                            focusManager.clearFocus() // Toglie il focus dal campo di testo
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
                         }
                     )
                 )
@@ -170,41 +184,59 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
             //CONTAINER PAGINA
             Spacer(modifier = Modifier.height(10.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(10.dp, 10.dp, 10.dp, 10.dp)
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(10.dp)) {
                 // GENRE
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                        .background(Color.White)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.TopStart
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Book,
-                            contentDescription = "Book",
-                            modifier = Modifier.size(30.dp),
-                            tint = Color.Black
+                    Icon(
+                        imageVector = Icons.Filled.Book,
+                        contentDescription = "Book",
+                        modifier = Modifier.size(30.dp),
+                        tint = Color.Black
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("GENRE", fontWeight = FontWeight.Bold)
+                }
+
+                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                    genres.forEach { genre ->
+                        var isSelected by remember { mutableStateOf(false) }
+                        val animatedAlpha by animateFloatAsState(
+                            targetValue = if (isSelected) 1f else 0.5f,
+                            animationSpec = tween(durationMillis = 200), label = "alphaAnimation"
                         )
 
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "GENRE",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.align(Alignment.Top)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .background(
+                                    Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
+                                    RoundedCornerShape(16.dp)
+                                )
+                                .clickable {
+                                    isSelected = !isSelected
+                                    selectedGenre = if (isSelected) genre else null
+                                }
+                                .padding(12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(genre, color = Color.Black)
+                        }
                     }
                 }
+                Text(
+                    text = "see all",
+                    color = Color.Blue,
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate("search")
+                        }
+                        .padding(8.dp)
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -212,7 +244,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(230.dp)
                         .background(Color.White)
                         .padding(8.dp),
                     contentAlignment = Alignment.TopStart
@@ -235,18 +267,55 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         Text(
                             "FROM YOUR LIBRARY",
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.align(Alignment.Top)
+                            modifier = Modifier.align(Alignment.CenterVertically)
                         )
+                    }
+                    Row(modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(top = 40.dp)
+                    ) {
+                        books.forEach { book ->
+                            var isSelected by remember { mutableStateOf(false) }
+                            val animatedAlpha by animateFloatAsState(
+                                targetValue = if (isSelected) 1f else 0.5f,
+                                animationSpec = tween(durationMillis = 200), label = "alphaAnimation"
+                            )
+                            Spacer(modifier = Modifier.width(10.dp)) //spazio tra i libri
+
+                            Box(
+                                modifier = Modifier
+                                    .height(140.dp)
+                                    .width(120.dp)
+                                    .background(
+                                        Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
+                                        RoundedCornerShape(16.dp)
+                                    )
+                                    .clickable {
+                                        isSelected = !isSelected
+                                        selectedGenre = if (isSelected) book else null
+                                    }
+                                    .padding(12.dp),
+
+
+                                contentAlignment = Alignment.Center
+                            )
+
+                            {
+                                Text(book, color = Color.Black)
+                            }
+
+                        }
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+
                 // FAVOURITE
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp)
+                        .height(230.dp)
                         .background(Color.White)
                         .padding(8.dp),
                     contentAlignment = Alignment.TopStart
@@ -257,21 +326,59 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         horizontalArrangement = Arrangement.Start
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            contentDescription = "Book",
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favourite",
                             modifier = Modifier.size(30.dp),
                             tint = Color.Black
                         )
 
                         Spacer(modifier = Modifier.width(8.dp))
 
+                        // Testo
                         Text(
                             "YOUR FAVOURITE",
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.align(Alignment.Top)
+                            modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
+                    Row(modifier = Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(top = 40.dp)
+                    ) {
+                        books.forEach { book ->
+                            var isSelected by remember { mutableStateOf(false) }
+                            val animatedAlpha by animateFloatAsState(
+                                targetValue = if (isSelected) 1f else 0.5f,
+                                animationSpec = tween(durationMillis = 200), label = "alphaAnimation"
+                            )
+                            Spacer(modifier = Modifier.width(10.dp)) //spazio tra i libri
+
+                            Box(
+                                modifier = Modifier
+                                    .height(140.dp)
+                                    .width(120.dp)
+                                    .background(
+                                        Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
+                                        RoundedCornerShape(16.dp)
+                                    )
+                                    .clickable {
+                                        isSelected = !isSelected
+                                        selectedGenre = if (isSelected) book else null
+                                    }
+                                    .padding(12.dp),
+
+
+                                contentAlignment = Alignment.Center
+                            )
+
+                            {
+                                Text(book, color = Color.Black)
+                            }
+
+                        }
+                    }
                 }
+
             }
         }
     }
