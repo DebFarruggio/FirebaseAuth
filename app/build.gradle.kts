@@ -52,6 +52,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    implementation ("androidx.compose.material:material-icons-extended:1.3.0")
+
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))

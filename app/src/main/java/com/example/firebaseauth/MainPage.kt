@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -51,7 +52,7 @@ fun MainPage(modifier: Modifier = Modifier, navController: NavController, authVi
         NavItem("Search", Icons.Default.Search),
         NavItem("Add", Icons.Default.Add),
         NavItem("Favourite", Icons.Default.Favorite),
-        NavItem("Profile", Icons.Default.Person)
+        NavItem("Book", Icons.Default.Book)
     )
 
     var selectedIndex by remember {
