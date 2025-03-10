@@ -188,7 +188,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 // GENRE
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
@@ -197,12 +199,15 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         contentDescription = "Book",
                         modifier = Modifier.size(30.dp),
                         tint = Color.Black
+
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("GENRE", fontWeight = FontWeight.Bold)
                 }
 
-                Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                Row(
+
+                    modifier = Modifier.horizontalScroll(rememberScrollState()), ) {
                     genres.forEach { genre ->
                         var isSelected by remember { mutableStateOf(false) }
                         val animatedAlpha by animateFloatAsState(
