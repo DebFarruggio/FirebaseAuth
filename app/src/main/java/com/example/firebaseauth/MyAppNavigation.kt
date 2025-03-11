@@ -1,13 +1,17 @@
 package com.example.firebaseauth
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.firebaseauth.pages.AddPage
 import com.example.firebaseauth.pages.FavouritePage
+import com.example.firebaseauth.pages.FilteredBooksPage
 import com.example.firebaseauth.pages.HomePage
 import com.example.firebaseauth.pages.LoginPage
 import com.example.firebaseauth.pages.ProfilePage
@@ -38,13 +42,20 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
             AddPage(modifier, navController, context)
         }
         composable("search"){
-            SearchPage(searchViewModel)
+            SearchPage(searchViewModel, navController)
         }
         composable("profile"){
             ProfilePage()
         }
         composable("favourite"){
             FavouritePage()
+        }
+        composable("filteredbooks/{category}", arguments = listOf(navArgument("category") { type = NavType.StringType })){
+            backStackEntry ->
+            val category = backStackEntry.arguments?.getString("category") ?: ""
+            Log.d("NavHost", "Navigato a filteredbooks con categoria: $category")
+            // Passa category al ViewModel
+            FilteredBooksPage(category, navController, searchViewModel)
         }
     }
 

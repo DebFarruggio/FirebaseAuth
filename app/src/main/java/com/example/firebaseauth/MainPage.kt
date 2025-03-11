@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,7 +51,7 @@ fun MainPage(modifier: Modifier = Modifier, navController: NavController, authVi
         NavItem("Search", Icons.Default.Search),
         NavItem("Add", Icons.Default.Add),
         NavItem("Favourite", Icons.Default.Favorite),
-        NavItem("Book", Icons.Default.Book)
+        NavItem("Book", Icons.Filled.Book)
     )
 
     var selectedIndex by remember {
@@ -108,7 +107,7 @@ fun MainPage(modifier: Modifier = Modifier, navController: NavController, authVi
 fun ContentScreen(modifier: Modifier = Modifier, selectedIndex : Int, navController: NavController, authViewModel: AuthViewModel, context : Context, searchViewModel: SearchViewModel){
     when(selectedIndex){
         0 -> HomePage(modifier, navController, authViewModel)
-        1 -> SearchPage(searchViewModel)
+        1 -> SearchPage(searchViewModel, navController)
         2 -> AddPage(modifier, navController, context)
         3 -> FavouritePage()
         4 -> ProfilePage()

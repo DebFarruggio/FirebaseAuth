@@ -86,6 +86,8 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview-selection:1.1.0")
 
     implementation ("androidx.cardview:cardview:1.0.0")
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
+    implementation("androidx.navigation:navigation-compose:2.7.5") // Controlla l'ultima versione
 
     // Coil
     implementation("io.coil-kt:coil-compose:2.4.0")
