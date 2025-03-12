@@ -89,6 +89,8 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
         label = "heart alpha animation"
     )
 
+
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Back button in top right
         IconButton(

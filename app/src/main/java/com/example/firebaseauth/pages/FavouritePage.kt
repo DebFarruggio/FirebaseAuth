@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 data class FavoriteBook(
     val id: String,
@@ -28,20 +30,34 @@ object FavoritesManager {
     private val _favorites = mutableStateListOf<FavoriteBook>()
     val favorites: List<FavoriteBook> = _favorites
 
+    private val _favoritesFlow = MutableStateFlow<List<FavoriteBook>>(_favorites.toList())
+    val favoritesFlow: StateFlow<List<FavoriteBook>> = _favoritesFlow
+
     fun addFavorite(book: FavoriteBook) {
-        if (_favorites.none { it.id == book.id }) {
+        if (!isBookFavorite(book.id)) {
             _favorites.add(book)
+            _favoritesFlow.value = _favorites.toList()
         }
     }
 
     fun removeFavorite(bookId: String) {
-        _favorites.removeAll { it.id == bookId }
+        _favorites.removeIf { it.id == bookId }
+        _favoritesFlow.value = _favorites.toList()
     }
 
     fun isBookFavorite(bookId: String): Boolean {
         return _favorites.any { it.id == bookId }
     }
+
+    fun getFavoriteBooks(): List<FavoriteBook> {
+        return _favorites.toList()
+    }
+
+    fun getFavoriteById(bookId: String): FavoriteBook? {
+        return _favorites.find { it.id == bookId }
+    }
 }
+
 
 @Composable
 fun FavouritePage(

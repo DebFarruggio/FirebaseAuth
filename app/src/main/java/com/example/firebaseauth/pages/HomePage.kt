@@ -61,6 +61,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import  androidx.compose.foundation.clickable
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import com.example.firebaseauth.pages.FavoritesManager.favorites
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,6 +100,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         NavItem("Favourite", Icons.Default.Favorite),
         NavItem("Book", Icons.Default.Book)
     )
+
+
+
 
 
     LaunchedEffect(authState.value) {
@@ -209,7 +217,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 Row(
 
-                    modifier = Modifier.horizontalScroll(rememberScrollState()), ) {
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                ) {
                     categories.forEach { category ->
                         var isSelected by remember { mutableStateOf(false) }
                         val animatedAlpha by animateFloatAsState(
@@ -284,15 +293,17 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
-                    Row(modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .padding(top = 40.dp)
+                    Row(
+                        modifier = Modifier
+                            .horizontalScroll(rememberScrollState())
+                            .padding(top = 40.dp)
                     ) {
                         books.forEach { book ->
                             var isSelected by remember { mutableStateOf(false) }
                             val animatedAlpha by animateFloatAsState(
                                 targetValue = if (isSelected) 1f else 0.5f,
-                                animationSpec = tween(durationMillis = 200), label = "alphaAnimation"
+                                animationSpec = tween(durationMillis = 200),
+                                label = "alphaAnimation"
                             )
                             Spacer(modifier = Modifier.width(10.dp)) //spazio tra i libri
 
@@ -308,7 +319,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                                         isSelected = !isSelected
                                         selectedGenre = if (isSelected) book else null
 
-                                            navController.navigate("book")
+                                        navController.navigate("book")
 
                                     }
                                     .padding(12.dp),
@@ -358,49 +369,65 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
-                    Row(modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .padding(top = 40.dp)
-                    ) {
-                        books.forEach { book ->
-                            var isSelected by remember { mutableStateOf(false) }
-                            val animatedAlpha by animateFloatAsState(
-                                targetValue = if (isSelected) 1f else 0.5f,
-                                animationSpec = tween(durationMillis = 200), label = "alphaAnimation"
-                            )
-                            Spacer(modifier = Modifier.width(10.dp)) //spazio tra i libri
 
-                            Box(
-                                modifier = Modifier
-                                    .height(140.dp)
-                                    .width(120.dp)
-                                    .background(
-                                        Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .clickable {
-                                        isSelected = !isSelected
-                                        selectedGenre = if (isSelected) book else null
+                    if (favorites.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No favorites yet", color = Color.Gray)
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(top = 40.dp)
+                        ) {
+                            favorites.forEach { book ->
+                                Spacer(modifier = Modifier.width(10.dp))
+
+                                Box(
+                                    modifier = Modifier
+                                        .height(140.dp)
+                                        .width(120.dp)
+                                        .background(
+                                            Color(0xFFA7E8EB),
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable {
+                                            navController.navigate("book")
+                                        }
+                                        .padding(12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = book.title,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = book.author,
+                                            fontSize = 12.sp,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
                                     }
-                                    .padding(12.dp),
-
-
-                                contentAlignment = Alignment.Center
-                            )
-
-                            {
-                                Text(book, color = Color.Black)
+                                }
                             }
-
                         }
                     }
                 }
-
             }
         }
     }
 }
-
 
 
 
