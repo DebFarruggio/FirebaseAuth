@@ -76,9 +76,9 @@ fun FilteredBooksPage(category: String, navController: NavController, viewModel:
             // Pulsante per tornare alla pagina di ricerca
             Button(
                 onClick = { navController.popBackStack() },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA7E8EB)) // Imposta il colore di sfondo
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFA7E8EB))
             ) {
-                Text("Back to Search", color = Color.Black) // Puoi personalizzare anche il colore del testo
+                Text("Back to Search", color = Color.Black)
             }
 
         }
