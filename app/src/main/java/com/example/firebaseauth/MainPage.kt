@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.example.firebaseauth.data.NavItem
 import com.example.firebaseauth.pages.AddPage
+import com.example.firebaseauth.pages.BookUser
 import com.example.firebaseauth.pages.FavouritePage
 import com.example.firebaseauth.pages.HomePage
 import com.example.firebaseauth.pages.ProfilePage
@@ -111,7 +112,7 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex : Int, navControl
         1 -> SearchPage(searchViewModel, navController)
         2 -> AddPage(modifier, navController, context)
         3 -> FavouritePage()
-        4 -> ProfilePage(modifier, navController, authViewModel)
+        4 -> BookUser( navController, authViewModel)
     }
 }
 

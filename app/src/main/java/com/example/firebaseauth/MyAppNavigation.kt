@@ -11,9 +11,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.firebaseauth.pages.AddPage
 import com.example.firebaseauth.pages.BookDetails
+import com.example.firebaseauth.pages.BookUser
 import com.example.firebaseauth.pages.FavouritePage
 import com.example.firebaseauth.pages.FilteredBooksPage
 import com.example.firebaseauth.pages.HomePage
+import com.example.firebaseauth.pages.LibraryPage
+import com.example.firebaseauth.pages.ListBookAddPage
 import com.example.firebaseauth.pages.LoginPage
 import com.example.firebaseauth.pages.ProfilePage
 import com.example.firebaseauth.pages.SearchPage
@@ -54,6 +57,19 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
         composable("book"){
             BookDetails(navController, authViewModel)
         }
+        composable("bookUser"){
+            BookUser(navController, authViewModel)
+        }
+
+        composable("library"){
+            LibraryPage(navController, authViewModel)
+        }
+
+        composable("listBookAdd"){
+            ListBookAddPage(navController)
+        }
+
+
 
         composable("filteredbooks/{category}", arguments = listOf(navArgument("category") { type = NavType.StringType })){
             backStackEntry ->
