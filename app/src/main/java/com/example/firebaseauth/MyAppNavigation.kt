@@ -52,7 +52,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
             FavouritePage()
         }
         composable("book"){
-            BookDetails(navController)
+            BookDetails(navController, authViewModel)
         }
 
         composable("filteredbooks/{category}", arguments = listOf(navArgument("category") { type = NavType.StringType })){

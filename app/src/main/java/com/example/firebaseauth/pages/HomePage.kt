@@ -60,10 +60,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import  androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import com.example.firebaseauth.data.Book
+import androidx.compose.material.icons.filled.MenuBook
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -200,7 +197,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Book,
+                        imageVector = Icons.Filled.MenuBook,
                         contentDescription = "Book",
                         modifier = Modifier.size(30.dp),
                         tint = Color.Black

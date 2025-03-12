@@ -1,21 +1,21 @@
 package com.example.firebaseauth.pages
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,21 +24,70 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.draw.scale
+import com.example.firebaseauth.viewmodel.AuthState
+import com.example.firebaseauth.viewmodel.AuthViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun BookDetails(navController: NavController) {
-    // State to control dialogs visibility
+fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val currentUserEmail = currentUser?.email ?: ""
+
+    val authState = authViewModel.authState.observeAsState().value
+
+    LaunchedEffect(authState) {
+        if (authState !is AuthState.Authenticated) {
+            navController.navigate("login")
+        }
+    }
+
+    val (submittedReviews, setSubmittedReviews) = remember {
+        mutableStateOf(mutableStateListOf<Pair<String, String>>()) //(email autore, testo)
+    }
+
+
+    var reviewText by remember { mutableStateOf("") }
+    var showReviewDialog by remember { mutableStateOf(false) }
     var showContactDialog by remember { mutableStateOf(false) }
     var showLoanRequestDialog by remember { mutableStateOf(false) }
-    var showReviewDialog by remember { mutableStateOf(false) }
+    var deleteRequest by remember { mutableStateOf(false) }
     var isLoanRequested by remember { mutableStateOf(false) }
-
-    // State for review text
-    var reviewText by remember { mutableStateOf("") }
-    var submittedReviews by remember { mutableStateOf<List<String>>(emptyList()) }
-
-    // Coroutine scope for delayed actions
     val coroutineScope = rememberCoroutineScope()
+
+    val bookId = remember { "book_${System.currentTimeMillis()}" }
+
+    var isFavorite by remember { mutableStateOf(FavoritesManager.isBookFavorite(bookId)) }
+    var isAnimating by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isAnimating) 20f else 1f,
+        animationSpec = tween(
+            durationMillis = 800,
+            easing = FastOutSlowInEasing
+        ),
+        finishedListener = {
+            if (isAnimating) {
+                isAnimating = false
+            }
+        },
+        label = "heart scale animation"
+    )
+    val alpha by animateFloatAsState(
+        targetValue = if (isAnimating) 0f else 1f,
+        animationSpec = tween(
+            durationMillis = 800,
+            easing = FastOutSlowInEasing
+        ),
+        label = "heart alpha animation"
+    )
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Back button in top right
@@ -63,7 +112,11 @@ fun BookDetails(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Titolo
-            Text(text = "TITLE", fontSize = 35.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "TITLE",
+                fontSize = 35.sp,
+                fontWeight = FontWeight.Bold,
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -76,7 +129,61 @@ fun BookDetails(navController: NavController) {
                     modifier = Modifier
                         .size(130.dp, 200.dp)
                         .background(Color((0xFFA7E8EB)), shape = RoundedCornerShape(8.dp))
-                )
+                ) {
+
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        IconButton(
+                            onClick = {
+                                if (!isFavorite) {
+                                    // Add to favorites
+                                    val favoriteBook = FavoriteBook(
+                                        id = bookId,
+                                        title = "HARRY POTTER",
+                                        author = "J.K Rowling",
+                                        year = "1994",
+                                        genre = "Fantasy"
+                                    )
+                                    FavoritesManager.addFavorite(favoriteBook)
+                                    isAnimating = true
+                                } else {
+                                    FavoritesManager.removeFavorite(bookId)
+                                }
+                                isFavorite = !isFavorite
+
+
+                            },
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Favorite",
+                                tint = if (isFavorite) Color(0xFFF100F1) else Color.Black,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+
+                    // animazione cuore
+                    if (isAnimating) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Favorite,
+                                contentDescription = null,
+                                tint = Color(0xFFFC00FC).copy(alpha = alpha),
+                                modifier = Modifier
+                                    .scale(scale)
+                                    .size(24.dp)
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.width(30.dp))
 
@@ -102,7 +209,7 @@ fun BookDetails(navController: NavController) {
                     .background(Color.White, shape = RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "breve riassunto", fontWeight = FontWeight.Bold)
+                Text(text = "short description", fontWeight = FontWeight.Bold)
             }
 
             Spacer(modifier = Modifier.height(30.dp))
@@ -115,19 +222,28 @@ fun BookDetails(navController: NavController) {
                 ) {
                     Text(text = "contact owner", color = Color.Black)
                 }
+
                 Button(
                     onClick = {
-                        if (!isLoanRequested) {
+                        if (isLoanRequested) {
+                            deleteRequest = true
+                            isLoanRequested = false
+
+                            coroutineScope.launch {
+                                delay(2000)
+                                deleteRequest = false
+                            }
+                        } else {
                             showLoanRequestDialog = true
                             coroutineScope.launch {
-                                delay(2000) // 2 seconds delay
+                                delay(2000)
                                 showLoanRequestDialog = false
                                 isLoanRequested = true
                             }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        if (isLoanRequested) Color(0xFFFF0000) else Color(0xFF71F55E)
+                        if (isLoanRequested) Color(0xFFFF9800) else Color(0xFF71F55E)
                     )
                 ) {
                     Text(
@@ -135,6 +251,7 @@ fun BookDetails(navController: NavController) {
                         color = if (isLoanRequested) Color.White else Color.Black
                     )
                 }
+
                 Button(
                     onClick = { showReviewDialog = true },
                     colors = ButtonDefaults.buttonColors(Color(0xFFA7E8EB))
@@ -149,7 +266,7 @@ fun BookDetails(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .heightIn(min = 180.dp)
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
                     .padding(16.dp)
             ) {
@@ -168,16 +285,49 @@ fun BookDetails(navController: NavController) {
                             fontSize = 18.sp,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        Column(
+
+                        LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
+                                .weight(1f)
                         ) {
-                            submittedReviews.forEachIndexed { index, review ->
-                                Text(
-                                    text = review,
-                                    modifier = Modifier.padding(vertical = 4.dp)
-                                )
+                            itemsIndexed(submittedReviews) { index, (authorEmail, review) ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Review text with author initial
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = authorEmail.split("@").first(),
+                                            fontSize = 12.sp,
+                                            color = Color.Gray
+                                        )
+                                        Text(text = review)
+                                    }
+
+                                    // Delete icon, solo per le recensioni dell'utente corrente
+                                    if (authorEmail == currentUserEmail) {
+                                        IconButton(
+                                            onClick = {
+                                                val newList = submittedReviews.toMutableList()
+                                                newList.removeAt(index)
+                                                setSubmittedReviews(newList.toMutableStateList())
+                                            },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Delete review",
+                                                tint = Color.Red
+                                            )
+                                        }
+                                    }
+                                }
+
                                 if (index < submittedReviews.size - 1) {
                                     Divider(modifier = Modifier.padding(vertical = 4.dp))
                                 }
@@ -187,6 +337,7 @@ fun BookDetails(navController: NavController) {
                 }
             }
         }
+
 
         // Contact Owner Dialog
         if (showContactDialog) {
@@ -200,7 +351,6 @@ fun BookDetails(navController: NavController) {
                     Box(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // Close button (X) in top left
                         IconButton(
                             onClick = { showContactDialog = false },
                             modifier = Modifier.align(Alignment.TopStart)
@@ -273,6 +423,33 @@ fun BookDetails(navController: NavController) {
             }
         }
 
+        // Delete Request
+        if (deleteRequest) {
+            Dialog(onDismissRequest = {  }) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Request Delete",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
+
         // Review Dialog
         if (showReviewDialog) {
             Dialog(onDismissRequest = { showReviewDialog = false }) {
@@ -321,35 +498,23 @@ fun BookDetails(navController: NavController) {
                                     .fillMaxWidth()
                                     .height(150.dp),
                                 placeholder = { Text("Share your thoughts about this book...") },
-
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
+                            Button(
+                                onClick = {
+                                    if (reviewText.isNotBlank() && currentUserEmail.isNotEmpty()) {
+                                        val newReviews = submittedReviews.toMutableList()
+                                        newReviews.add(Pair(currentUserEmail, reviewText))
+                                        setSubmittedReviews(newReviews.toMutableStateList())
+                                        reviewText = ""
+                                        showReviewDialog = false
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(Color(0xFFA7E8EB))
                             ) {
-
-
-                                Button(
-                                    onClick = {
-                                        if (reviewText.isNotBlank()) {
-                                            submittedReviews = submittedReviews + reviewText
-                                            reviewText = ""
-                                            showReviewDialog = false
-                                        }
-                                    },
-                                    colors = ButtonDefaults.buttonColors(Color(0xFFA7E8EB))
-                                ) {
-                                    Text("Submit", color = Color.Black)
-                                }
-
-
-
-
-
-
+                                Text("Submit", color = Color.Black)
                             }
                         }
                     }
@@ -392,3 +557,4 @@ fun BookInfoItem(label: String, value: String) {
         Text(text = value)
     }
 }
+
