@@ -60,12 +60,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import  androidx.compose.foundation.clickable
-
-
-
-
-
-
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import com.example.firebaseauth.data.Book
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,8 +82,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     var selectedGenre by remember { mutableStateOf<String?>(null) }
 
-    val genres = listOf("Horror", "Mistery", "Fantasy", "Thriller", "Romance")
     val books = listOf("Book 1", "Book 2", "Book 3", "Book 4")
+
+    val categories = listOf(
+        "Adventure", "Classics", "Crime", "Folk", "Fantasy", "Historical",
+        "Horror", "Literary fiction", "Mystery", "Poetry", "Plays", "Romance",
+        "Science fiction", "Short stories", "Thrillers", "War", "Women’s fiction", "Young adult"
+    )
 
 
     val navItemList = listOf(
@@ -208,7 +211,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 Row(
 
                     modifier = Modifier.horizontalScroll(rememberScrollState()), ) {
-                    genres.forEach { genre ->
+                    categories.forEach { category ->
                         var isSelected by remember { mutableStateOf(false) }
                         val animatedAlpha by animateFloatAsState(
                             targetValue = if (isSelected) 1f else 0.5f,
@@ -224,12 +227,18 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                                 )
                                 .clickable {
                                     isSelected = !isSelected
-                                    selectedGenre = if (isSelected) genre else null
+                                    selectedGenre = if (isSelected) category else null
+                                    if (category.isNotEmpty()) {
+                                        navController.navigate("filteredbooks/$category")
+                                    }
+
                                 }
                                 .padding(12.dp),
                             contentAlignment = Alignment.Center
-                        ) {
-                            Text(genre, color = Color.Black)
+                        )
+
+                        {
+                            Text(category, color = Color.Black)
                         }
                     }
                 }
@@ -242,6 +251,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                         }
                         .padding(8.dp)
                 )
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -388,3 +398,8 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         }
     }
 }
+
+
+
+
+
