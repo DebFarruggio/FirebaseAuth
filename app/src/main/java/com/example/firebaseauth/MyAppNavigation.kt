@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.firebaseauth.pages.AddPage
+import com.example.firebaseauth.pages.BookDetails
 import com.example.firebaseauth.pages.FavouritePage
 import com.example.firebaseauth.pages.FilteredBooksPage
 import com.example.firebaseauth.pages.HomePage
@@ -50,6 +51,10 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
         composable("favourite"){
             FavouritePage()
         }
+        composable("book"){
+            BookDetails(navController)
+        }
+
         composable("filteredbooks/{category}", arguments = listOf(navArgument("category") { type = NavType.StringType })){
             backStackEntry ->
             val category = backStackEntry.arguments?.getString("category") ?: ""

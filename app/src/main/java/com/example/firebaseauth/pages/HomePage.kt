@@ -99,12 +99,14 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         NavItem("Book", Icons.Default.Book)
     )
 
+
     LaunchedEffect(authState.value) {
         when (authState.value) {
             is AuthState.Unauthenticated -> navController.navigate("login")
             else -> Unit
         }
     }
+
 
     LaunchedEffect(Unit) {
         searchFocusRequester.requestFocus()
@@ -308,6 +310,9 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                                     .clickable {
                                         isSelected = !isSelected
                                         selectedGenre = if (isSelected) book else null
+
+                                            navController.navigate("book")
+
                                     }
                                     .padding(12.dp),
 
