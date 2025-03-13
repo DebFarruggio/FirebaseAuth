@@ -43,8 +43,10 @@ import com.example.firebaseauth.viewmodel.AuthState
 import com.example.firebaseauth.viewmodel.AuthViewModel
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.alpha
@@ -240,4 +242,58 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
         }
     }
 }
+    if (authState.value == AuthState.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x80000000)),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingSpinner()
+        }
+    }
+}
+
+@Composable
+fun LoadingSpinner() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(60.dp),
+            color = Color(0xFFA7E8EB),
+            strokeWidth = 5.dp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "login..",
+            color = Color.White,
+            fontSize = 18.sp
+        )
+
+        // Animazione libro rotante
+        val rotation = rememberInfiniteTransition().animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1500, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            )
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Icon(
+            imageVector = Icons.Filled.MenuBook,
+            contentDescription = "Loading Book",
+            modifier = Modifier
+                .size(40.dp)
+                .graphicsLayer {
+                    rotationZ = rotation.value
+                },
+            tint = Color(0xFFA7E8EB)
+        )
+    }
 }
