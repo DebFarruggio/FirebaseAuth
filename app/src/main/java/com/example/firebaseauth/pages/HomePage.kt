@@ -60,12 +60,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import  androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import com.example.firebaseauth.data.Book
 import com.example.firebaseauth.pages.FavoritesManager.favorites
-
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,14 +84,13 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
     var searchQuery by remember { mutableStateOf(query) }
 
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
 
     val searchFocusRequester = remember { FocusRequester() }
 
     var selectedGenre by remember { mutableStateOf<String?>(null) }
-
-    val books = listOf("Book 1", "Book 2", "Book 3", "Book 4")
 
     val categories = listOf(
         "Adventure", "Classics", "Crime", "Folk", "Fantasy", "Historical",
@@ -102,8 +108,16 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     )
 
 
+    val featuredBooks = remember { mutableStateOf<List<Book>>(emptyList()) }
+    val isLoading = remember { mutableStateOf(true) }
 
-
+    // Effect to fetch featured books when the composable is first displayed
+    LaunchedEffect(Unit) {
+        fetchFeaturedBooks { books ->
+            featuredBooks.value = books
+            isLoading.value = false
+        }
+    }
 
     LaunchedEffect(authState.value) {
         when (authState.value) {
@@ -123,6 +137,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             Spacer(modifier = Modifier.height(88.dp))
 
             // Top Bar
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -131,6 +146,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                //notifications
                 IconButton(onClick = {}) {
                     Icon(
                         imageVector = Icons.Default.Notifications,
@@ -142,7 +158,11 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 // Campo di ricerca
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it },
+                    onValueChange = { searchQuery = it
+                        if (searchQuery.isNotEmpty()) {
+                            viewModel.searchBooks(searchQuery)
+                        }
+                                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -175,7 +195,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
-                            Log.d("SearchPage", "Ricerca avviata con query: $query")
                             viewModel.searchBooks(query)
                             keyboardController?.hide()
                             focusManager.clearFocus()
@@ -183,6 +202,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                     )
                 )
 
+                //profile
                 IconButton(onClick = { navController.navigate("profile") }) {
                     Icon(
                         imageVector = Icons.Default.Person,
@@ -263,7 +283,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // FROM LIBRARY
+                //FEATURED BOOKS
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -286,55 +306,110 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        // Testo
+                        // Text
                         Text(
-                            "FROM YOUR LIBRARY",
+                            "FEATURED BOOKS",
                             style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier.align(Alignment.CenterVertically)
                         )
                     }
-                    Row(
-                        modifier = Modifier
-                            .horizontalScroll(rememberScrollState())
-                            .padding(top = 40.dp)
-                    ) {
-                        books.forEach { book ->
-                            var isSelected by remember { mutableStateOf(false) }
-                            val animatedAlpha by animateFloatAsState(
-                                targetValue = if (isSelected) 1f else 0.5f,
-                                animationSpec = tween(durationMillis = 200),
-                                label = "alphaAnimation"
-                            )
-                            Spacer(modifier = Modifier.width(10.dp)) //spazio tra i libri
 
-                            Box(
-                                modifier = Modifier
-                                    .height(140.dp)
-                                    .width(120.dp)
-                                    .background(
-                                        Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .clickable {
-                                        isSelected = !isSelected
-                                        selectedGenre = if (isSelected) book else null
+                    if (isLoading.value) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(140.dp)
+                                .padding(top = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = Color(0xFFA7E8EB))
+                        }
+                    } else if (featuredBooks.value.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(140.dp)
+                                .padding(top = 40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("No featured books available", color = Color.Gray)
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .padding(top = 40.dp)
+                        ) {
+                            featuredBooks.value.forEach { book ->
+                                var isSelected by remember { mutableStateOf(false) }
+                                val animatedAlpha by animateFloatAsState(
+                                    targetValue = if (isSelected) 1f else 0.5f,
+                                    animationSpec = tween(durationMillis = 200),
+                                    label = "alphaAnimation"
+                                )
 
-                                        navController.navigate("book")
+                                Spacer(modifier = Modifier.width(10.dp))
 
+                                Box(
+                                    modifier = Modifier
+                                        .height(150.dp)
+                                        .width(120.dp)
+                                        .background(
+                                            Color(0xFFA7E8EB).copy(alpha = animatedAlpha),
+                                            RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable {
+                                            isSelected = !isSelected
+                                            selectedGenre = if (isSelected) book.type else null
+                                            navController.navigate("book")
+                                        }
+                                        .padding(12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(
+                                            text = book.title,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Text(
+                                            text = book.author,
+                                            color = Color.DarkGray,
+                                            fontSize = 12.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        Text(
+                                            text = book.type,
+                                            color = Color.Gray,
+                                            fontSize = 10.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier
+                                                .background(
+                                                    Color.White.copy(alpha = 0.3f),
+                                                    RoundedCornerShape(4.dp)
+                                                )
+                                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                                        )
                                     }
-                                    .padding(12.dp),
-
-
-                                contentAlignment = Alignment.Center
-                            )
-
-                            {
-                                Text(book, color = Color.Black)
+                                }
                             }
-
                         }
                     }
                 }
+
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -430,5 +505,54 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
 }
 
 
+private fun fetchFeaturedBooks(onComplete: (List<Book>) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
 
+
+    db.collection("books")
+        .limit(10)  // Limit to 10 books
+        .get()
+        .addOnSuccessListener { documents ->
+            val booksList = mutableListOf<Book>()
+            for (document in documents) {
+                val book = document.toObject(Book::class.java)
+                booksList.add(book)
+            }
+            onComplete(booksList)
+        }
+        .addOnFailureListener { exception ->
+            Log.e("Firestore", "Error getting featured books: ", exception)
+            onComplete(emptyList())
+        }
+}
+
+
+@Composable
+fun BookItemClickable(book: Book, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Author: ${book.author}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+            Text(
+                text = "Category: ${book.type}",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+    }
+}
 
