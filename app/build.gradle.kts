@@ -58,6 +58,8 @@ dependencies {
     implementation ("androidx.compose.material:material:1.4.0")
     implementation ("androidx.compose.ui:ui-tooling-preview:1.4.0")
 
+    implementation ("com.google.accompanist:accompanist-swiperefresh:0.28.0")
+
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))

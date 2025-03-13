@@ -52,7 +52,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
             ProfilePage(modifier, navController, authViewModel)
         }
         composable("favourite"){
-            FavouritePage()
+            FavouritePage(navController)
         }
         composable("book"){
             BookDetails(navController, authViewModel)

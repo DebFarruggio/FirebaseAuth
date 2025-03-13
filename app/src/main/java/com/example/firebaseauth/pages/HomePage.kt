@@ -66,10 +66,16 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
+import com.example.firebaseauth.ContentScreen
 import com.example.firebaseauth.data.Book
 import com.example.firebaseauth.pages.FavoritesManager.favorites
 import com.google.firebase.firestore.FirebaseFirestore
@@ -131,6 +137,7 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         searchFocusRequester.requestFocus()
         keyboardController?.show()
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {

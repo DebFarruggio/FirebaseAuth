@@ -1,5 +1,7 @@
 package com.example.firebaseauth.pages
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -24,40 +26,66 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.firebaseauth.viewmodel.AuthViewModel
+import androidx.compose.foundation.interaction.MutableInteractionSource
+
+import androidx.compose.foundation.hoverable
+
 
 @Composable
 fun BookUser(navController: NavController, authViewModel: AuthViewModel) {
     var expanded by remember { mutableStateOf(true) } // Start expanded by default
 
+    // Hover state for menu items
+    var isLibraryHovered by remember { mutableStateOf(false) }
+    var isAddBookHovered by remember { mutableStateOf(false) }
+    var isSelected by remember { mutableStateOf(false) }
+    val animatedAlpha by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0.5f,
+        animationSpec = tween(durationMillis = 200),
+        label = "alphaAnimation"
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Overlay background when dropdown is expanded
         if (expanded) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.5f))
-                    .clickable { expanded = false }
+                    .clickable {
+                        expanded = false
+                        navController.navigate("home")
+                    }
             )
         }
 
-        // Position the dropdown menu in the center bottom of the screen
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 64.dp) // Adjust as needed to position above bottom nav
+                .padding(bottom = 64.dp)
         ) {
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
+                onDismissRequest = {
+                    expanded = false
+                    navController.navigate("home")
+                },
                 modifier = Modifier.width(200.dp)
             ) {
-                DropdownMenuItem(onClick = {
-                    navController.navigate("library")
-                    expanded = false
-                }) {
+                DropdownMenuItem(
+                    onClick = {
+                        navController.navigate("library")
+                        expanded = false
+                    },
+                    modifier = Modifier
+                        .hoverable(
+                            interactionSource = remember { MutableInteractionSource() },
+                        )
+                        .background(if (isLibraryHovered)  Color(0xFFA7E8EB).copy(alpha = animatedAlpha)  else Color.Transparent)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Book,
                         contentDescription = "Library",
@@ -68,10 +96,17 @@ fun BookUser(navController: NavController, authViewModel: AuthViewModel) {
 
                 Divider()
 
-                DropdownMenuItem(onClick = {
-                    navController.navigate("listBookAdd")
-                    expanded = false
-                }) {
+                DropdownMenuItem(
+                    onClick = {
+                        navController.navigate("listBookAdd")
+                        expanded = false
+                    },
+                    modifier = Modifier
+                        .hoverable(
+                            interactionSource = remember { MutableInteractionSource() },
+                        )
+                        .background(if (isAddBookHovered) Color(0xFFA7E8EB).copy(alpha = animatedAlpha)else Color.Transparent)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add Book",

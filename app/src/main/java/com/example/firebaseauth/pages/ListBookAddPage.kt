@@ -3,10 +3,13 @@ package com.example.firebaseauth.pages
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,7 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ListBookAddPage(navController: NavController) {
     val context = LocalContext.current
@@ -32,6 +35,20 @@ fun ListBookAddPage(navController: NavController) {
     // State to hold book list
     var booksList by remember { mutableStateOf<List<BookWithId>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = {
+            isLoading = true
+            scope.launch {
+                loadBooks(db) { books ->
+                    booksList = books
+                    isLoading = false
+                }
+            }
+        }
+    )
+
 
     // Load books when the screen is first displayed
     LaunchedEffect(key1 = true) {
@@ -70,8 +87,7 @@ fun ListBookAddPage(navController: NavController) {
                     modifier = Modifier.align(Alignment.Center)
                 )
             } else {
-                // Important: Use fillMaxSize() to ensure LazyColumn takes all available space
-                // Don't use fixed heights that could restrict scrolling
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -94,6 +110,17 @@ fun ListBookAddPage(navController: NavController) {
                         )
                     }
                 }
+                if (isLoading && booksList.isEmpty()) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                PullRefreshIndicator(
+                    refreshing = isLoading,
+                    state = pullRefreshState,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+
             }     }
     }
 }

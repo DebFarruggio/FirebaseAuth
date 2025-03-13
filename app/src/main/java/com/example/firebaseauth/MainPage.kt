@@ -8,10 +8,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Output
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -39,7 +40,6 @@ import com.example.firebaseauth.pages.SearchPage
 import com.example.firebaseauth.viewmodel.AuthState
 import com.example.firebaseauth.viewmodel.AuthViewModel
 import com.example.firebaseauth.viewmodel.SearchViewModel
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel, searchViewModel: SearchViewModel){
@@ -77,9 +77,13 @@ fun MainPage(modifier: Modifier = Modifier, navController: NavController, authVi
                 ),
                 title = {
                     Text("EnjoyBooks")
+                },
+                actions = {
+                    IconButton(onClick = { authViewModel.signout() }) {
+                        Icon(imageVector = Icons.Default.Output, contentDescription = "Logout")
+                    }
                 }
             )
-
         },
         bottomBar = {
             NavigationBar{
@@ -102,7 +106,6 @@ fun MainPage(modifier: Modifier = Modifier, navController: NavController, authVi
     ){ innerPadding ->
         ContentScreen(modifier = Modifier.padding(innerPadding), selectedIndex, navController, authViewModel, context, searchViewModel)
     }
-
 }
 
 @Composable
@@ -111,7 +114,7 @@ fun ContentScreen(modifier: Modifier = Modifier, selectedIndex : Int, navControl
         0 -> HomePage(modifier, navController, authViewModel)
         1 -> SearchPage(searchViewModel, navController)
         2 -> AddPage(modifier, navController, context)
-        3 -> FavouritePage()
+        3 -> FavouritePage(navController)
         4 -> BookUser( navController, authViewModel)
     }
 }
