@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +40,8 @@ data class FavoriteBook(
     val year: String,
     val genre: String
 )
+
+
 
 object FavoritesManager {
     private val _favorites = mutableStateListOf<FavoriteBook>()

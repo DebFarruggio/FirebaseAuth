@@ -60,22 +60,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import  androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.filled.Close
+
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.collectAsState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.draw.clip
+
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
-import com.example.firebaseauth.ContentScreen
+import androidx.compose.ui.window.Dialog
 import com.example.firebaseauth.data.Book
 import com.example.firebaseauth.pages.FavoritesManager.favorites
 import com.google.firebase.firestore.FirebaseFirestore
@@ -117,7 +120,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
     val featuredBooks = remember { mutableStateOf<List<Book>>(emptyList()) }
     val isLoading = remember { mutableStateOf(true) }
 
-    // Effect to fetch featured books when the composable is first displayed
     LaunchedEffect(Unit) {
         fetchFeaturedBooks { books ->
             featuredBooks.value = books
@@ -138,6 +140,16 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
         keyboardController?.show()
     }
 
+    var unreadNotifications by remember { mutableStateOf(3) }
+    var showNotificationPopup by remember { mutableStateOf(false) }
+
+    val notifications = remember {
+        listOf(
+            "Richiesta di affitto per libro 'Il nome della rosa'",
+            "Richiesta di affitto per libro 'La Divina Commedia'",
+            "Richiesta di affitto per libro 'I Promessi Sposi'"
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -154,22 +166,48 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 //notifications
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color.Black
-                    )
+                IconButton(onClick = {
+                    showNotificationPopup = true
+                    if (unreadNotifications > 0) {
+                        // Reset unread count when viewing notifications
+                        unreadNotifications = 0
+                    }
+                }) {
+                    Box(contentAlignment = Alignment.TopEnd) {
+                        Icon(
+                            imageVector = Icons.Default.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color.Black
+                        )
+                    }
+                    if (unreadNotifications > 0) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .offset(x = 8.dp, y = (-8).dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFA7E8EB))
+                        ) {
+                            Text(
+                                text = unreadNotifications.toString(),
+                                color = Color.Black,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
 
                 // Campo di ricerca
                 OutlinedTextField(
                     value = searchQuery,
-                    onValueChange = { searchQuery = it
+                    onValueChange = {
+                        searchQuery = it
                         if (searchQuery.isNotEmpty()) {
                             viewModel.searchBooks(searchQuery)
                         }
-                                    },
+                    },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -509,7 +547,102 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
             }
         }
     }
+    // Notification popup
+    if (showNotificationPopup) {
+        Dialog(onDismissRequest = { showNotificationPopup = false }) {
+            Surface(
+                modifier = Modifier
+                    .width(300.dp),
+                shape = RoundedCornerShape(8.dp),
+                tonalElevation = 8.dp
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "notifications",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+
+                        IconButton(
+                            onClick = { showNotificationPopup = false },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Color.Black
+                            )
+                        }
+                    }
+
+                    // List of notifications
+                    notifications.forEach { notification ->
+                        NotificationItem(notification)
+                    }
+                }
+            }
+        }
+    }
 }
+
+
+@Composable
+fun NotificationItem(message: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+
+        shape = RoundedCornerShape(4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = message,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = {  },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFD23333)
+                        ,
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("REJECT")
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = {  },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF98DD8E),
+                        contentColor = Color.Black
+                    )
+                ) {
+                    Text("ACCEPT")
+                }
+            }
+        }
+    }
+}
+
 
 
 private fun fetchFeaturedBooks(onComplete: (List<Book>) -> Unit) {

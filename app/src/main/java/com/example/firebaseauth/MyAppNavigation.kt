@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.firebaseauth.pages.AddPage
 import com.example.firebaseauth.pages.BookDetails
-import com.example.firebaseauth.pages.BookUser
+import com.example.firebaseauth.pages.BookPage
 import com.example.firebaseauth.pages.FavouritePage
 import com.example.firebaseauth.pages.FilteredBooksPage
 import com.example.firebaseauth.pages.HomePage
@@ -58,7 +58,7 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
             BookDetails(navController, authViewModel)
         }
         composable("bookUser"){
-            BookUser(navController, authViewModel)
+            BookPage(navController, authViewModel)
         }
 
         composable("library"){

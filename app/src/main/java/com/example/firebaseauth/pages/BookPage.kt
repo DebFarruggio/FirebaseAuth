@@ -36,7 +36,7 @@ import androidx.compose.foundation.hoverable
 
 
 @Composable
-fun BookUser(navController: NavController, authViewModel: AuthViewModel) {
+fun BookPage(navController: NavController, authViewModel: AuthViewModel) {
     var expanded by remember { mutableStateOf(true) } // Start expanded by default
 
     // Hover state for menu items
