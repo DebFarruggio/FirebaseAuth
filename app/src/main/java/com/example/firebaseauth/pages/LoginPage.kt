@@ -42,6 +42,110 @@ import androidx.navigation.NavController
 import com.example.firebaseauth.viewmodel.AuthState
 import com.example.firebaseauth.viewmodel.AuthViewModel
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.*
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.random.Random
+
+@Composable
+fun FallingBooksAnimation(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        repeat(40) { index ->
+            FallingBook(
+                delayMillis = index * 50L,
+                horizontalOffset = Random.nextInt(-150, 150).toFloat(),
+                size = Random.nextInt(40, 80).toFloat()
+            )
+        }
+    }
+}
+@Composable
+fun FallingBook(delayMillis: Long, horizontalOffset: Float, size: Float) {
+    var startAnimation by remember { mutableStateOf(false) }
+    var animationCompleted by remember { mutableStateOf(false) }
+
+    LaunchedEffect(key1 = true) {
+        delay(delayMillis)
+        startAnimation = true
+    }
+
+    val animationDuration = 2000
+    val animationSpec = tween<Float>(
+        durationMillis = animationDuration,
+        easing = FastOutSlowInEasing
+    )
+
+    val yOffsetAnimation = remember { Animatable(-100f) }
+    val rotationAnimation = remember { Animatable(0f) }
+    val alphaAnimation = remember { Animatable(1f) }
+    val scaleAnimation = remember { Animatable(1f) }
+
+    LaunchedEffect(startAnimation) {
+        if (startAnimation && !animationCompleted) {
+            launch {
+                yOffsetAnimation.animateTo(
+                    targetValue = 800f,
+                    animationSpec = animationSpec
+                )
+            }
+
+            launch {
+                rotationAnimation.animateTo(
+                    targetValue = Random.nextInt(-360, 360).toFloat(),
+                    animationSpec = animationSpec
+                )
+            }
+
+            launch {
+                delay(animationDuration / 2L)
+                alphaAnimation.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = animationDuration / 2,
+                        easing = LinearEasing
+                    )
+                )
+            }
+
+            launch {
+                scaleAnimation.animateTo(
+                    targetValue = 0.6f,
+                    animationSpec = animationSpec
+                )
+                animationCompleted = true
+            }
+        }
+    }
+
+    if (startAnimation && !animationCompleted) {
+        Icon(
+            imageVector = Icons.Filled.MenuBook,
+            contentDescription = "Falling Book",
+            modifier = Modifier
+                .offset(x = horizontalOffset.dp, y = yOffsetAnimation.value.dp)
+                .size(size.dp)
+                .alpha(alphaAnimation.value)
+                .graphicsLayer {
+                    rotationZ = rotationAnimation.value
+                    scaleX = scaleAnimation.value
+                    scaleY = scaleAnimation.value
+                },
+            tint = Color(0xFF95D1D3)
+        )
+    }
+}
+
+
 @Composable
 fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authViewModel: AuthViewModel){
 
@@ -76,6 +180,11 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
             repeatMode = RepeatMode.Reverse
         )
     )
+    Box(modifier = modifier.fillMaxSize()) {
+        FallingBooksAnimation()
+
+
+
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -83,15 +192,6 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Text("Login", fontSize = 32.sp)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Icon(
-            imageVector = Icons.Filled.MenuBook,
-            contentDescription = "Book Icon",
-            modifier = Modifier.offset(y = yOffset.dp).size(40.dp),
-            tint = Color(0xFF619FD9)
-        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -139,4 +239,5 @@ fun LoginPage(modifier: Modifier = Modifier, navController: NavController, authV
             Text("You don't have an account? Sign up", color = Color.Blue)
         }
     }
+}
 }
