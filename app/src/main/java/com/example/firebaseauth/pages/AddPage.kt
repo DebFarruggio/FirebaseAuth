@@ -2,6 +2,7 @@ package com.example.firebaseauth.pages
 
 import android.content.Context
 import android.text.TextUtils
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.firebaseauth.data.Book
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -203,9 +205,12 @@ fun addDataToFirebase(
     val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     //creating a collection reference for our Firebase Firestore database.
     val dbCourses: CollectionReference = db.collection("books")
+    //save the currentUser
+    val currentUser = FirebaseAuth.getInstance().currentUser
     val titleLower = title.lowercase()
     //adding our data to our courses object class.
-    val books = Book(title, titleLower, author, type)
+    Log.d("Utente", "Utente trovato: ${currentUser.toString()}")
+    val books = Book(title, titleLower, author, type, currentUser?.uid, currentUser?.email)
 
     //below method is use to add data to Firebase Firestore.
     dbCourses.add(books).addOnSuccessListener {
