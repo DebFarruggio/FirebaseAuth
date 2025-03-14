@@ -42,9 +42,12 @@ fun MyAppNavigation(modifier: Modifier = Modifier, authViewModel: AuthViewModel,
         composable("home"){
             HomePage(modifier, navController, authViewModel)
         }
-        composable("addpage"){
-            AddPage(modifier, navController, context)
+
+        composable("addpage?isEditing={isEditing}") { backStackEntry ->
+            val isEditing = backStackEntry.arguments?.getString("isEditing")?.toBoolean() ?: false
+            AddPage(navController = navController, context = context, isEditing = isEditing)
         }
+
         composable("search"){
             SearchPage(searchViewModel, navController)
         }

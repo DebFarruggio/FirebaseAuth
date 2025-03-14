@@ -696,3 +696,6 @@ fun BookItemClickable(book: Book, onClick: () -> Unit) {
     }
 }
 
+
+
+

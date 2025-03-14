@@ -40,7 +40,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AddPage(modifier: Modifier = Modifier, navController: NavController, context: Context) {
+fun AddPage(modifier: Modifier = Modifier, navController: NavController, context: Context, isEditing: Boolean = false) {
     val title = remember {
         mutableStateOf("")
     }
@@ -90,7 +90,7 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
                 tint = Color.Black
             )
         }
-        Text("Add book", fontSize = 32.sp)
+        Text(if (isEditing) "Edit Book" else "Add Book", fontSize = 32.sp)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -189,7 +189,7 @@ fun AddPage(modifier: Modifier = Modifier, navController: NavController, context
             // adding modifier to our button.
         ) {
             // on below line we are adding text for our button
-            Text(text = "Add Data")
+            Text(text = if (isEditing) "Save" else "Add Data")
         }
     }
 

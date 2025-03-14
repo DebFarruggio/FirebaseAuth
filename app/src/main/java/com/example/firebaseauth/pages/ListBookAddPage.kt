@@ -110,7 +110,7 @@ fun ListBookAddPage(navController: NavController) {
                                 }
                             },
                             onEditClick = {
-                                navController.navigate("addPage")
+                                navController.navigate("addPage?isEditing=true")
                             }
                         )
                     }
