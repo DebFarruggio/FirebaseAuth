@@ -42,7 +42,6 @@ data class FavoriteBook(
 )
 
 
-
 object FavoritesManager {
     private val _favorites = mutableStateListOf<FavoriteBook>()
     val favorites: List<FavoriteBook> = _favorites

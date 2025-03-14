@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.firebaseauth.data.Book
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
@@ -28,9 +29,14 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ListBookAddPage(navController: NavController) {
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val db = FirebaseFirestore.getInstance()
+
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val userId = currentUser?.uid
+
 
     // State to hold book list
     var booksList by remember { mutableStateOf<List<BookWithId>>(emptyList()) }
@@ -41,7 +47,7 @@ fun ListBookAddPage(navController: NavController) {
         onRefresh = {
             isLoading = true
             scope.launch {
-                loadBooks(db) { books ->
+                loadUserBooks(db, userId) { books ->
                     booksList = books
                     isLoading = false
                 }
@@ -49,14 +55,13 @@ fun ListBookAddPage(navController: NavController) {
         }
     )
 
-
-    // Load books when the screen is first displayed
     LaunchedEffect(key1 = true) {
-        loadBooks(db) { books ->
+        loadUserBooks(db, userId) { books ->
             booksList = books
             isLoading = false
         }
     }
+
 
     Scaffold(
         topBar = {
@@ -101,7 +106,7 @@ fun ListBookAddPage(navController: NavController) {
                             onDeleteClick = {
                                 scope.launch {
                                     deleteBook(db, bookWithId.id)
-                                    loadBooks(db) { books -> booksList = books }
+                                    loadUserBooks(db, userId) { books -> booksList = books }
                                 }
                             },
                             onEditClick = {
@@ -127,10 +132,14 @@ fun ListBookAddPage(navController: NavController) {
 
 
 data class BookWithId(val id: String, val book: Book)
+private fun loadUserBooks(db: FirebaseFirestore, userId: String?, onComplete: (List<BookWithId>) -> Unit) {
+    if (userId == null) {
+        onComplete(emptyList())
+        return
+    }
 
-// Function to fetch books from Firestore
-private fun loadBooks(db: FirebaseFirestore, onComplete: (List<BookWithId>) -> Unit) {
     db.collection("books")
+        .whereEqualTo("userId", userId)
         .get()
         .addOnSuccessListener { documents ->
             val booksList = documents.map { doc ->
