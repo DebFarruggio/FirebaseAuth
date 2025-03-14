@@ -54,6 +54,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation ("androidx.compose.material:material-icons-extended:1.3.0")
 
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // Gson dependency
+    implementation ("com.google.code.gson:gson:2.8.8")
+
 
     implementation ("androidx.compose.material:material:1.4.0")
     implementation ("androidx.compose.ui:ui-tooling-preview:1.4.0")
@@ -63,6 +69,8 @@ dependencies {
 
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+
+
 
 
     // TODO: Add the dependencies for Firebase products you want to use
