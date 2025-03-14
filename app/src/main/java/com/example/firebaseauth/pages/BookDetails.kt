@@ -35,9 +35,8 @@ import androidx.compose.ui.draw.scale
 import com.example.firebaseauth.viewmodel.AuthState
 import com.example.firebaseauth.viewmodel.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
-
 @Composable
-fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
+fun BookDetails(navController: NavController, authViewModel: AuthViewModel) {
     val currentUser = FirebaseAuth.getInstance().currentUser
     val currentUserEmail = currentUser?.email ?: ""
 
@@ -52,7 +51,6 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
     val (submittedReviews, setSubmittedReviews) = remember {
         mutableStateOf(mutableStateListOf<Pair<String, String>>()) //(email autore, testo)
     }
-
 
     var reviewText by remember { mutableStateOf("") }
     var showReviewDialog by remember { mutableStateOf(false) }
@@ -89,7 +87,41 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
         label = "heart alpha animation"
     )
 
+    var isBookAvailable by remember { mutableStateOf(true) }  // Change to false if book is not available
+    var buttonText by remember { mutableStateOf("available") }
 
+    // Toggle loan request status based on book availability
+    fun toggleLoanRequest() {
+        when {
+            isLoanRequested -> {
+                deleteRequest = true
+                isLoanRequested = false
+                buttonText = "available"
+                coroutineScope.launch {
+                    delay(2000) // Simulate network or database request delay
+                    deleteRequest = false
+                }
+            }
+            isBookAvailable -> {
+                showLoanRequestDialog = true
+                isLoanRequested = true
+                buttonText = "requested"
+                coroutineScope.launch {
+                    delay(2000) // Simulate network or database request delay
+                    showLoanRequestDialog = false
+                }
+            }
+            else -> {
+                showLoanRequestDialog = false
+                isLoanRequested = false
+                buttonText = "not available"
+                coroutineScope.launch {
+                    delay(2000) // Simulate network or database request delay
+                    showLoanRequestDialog = false
+                }
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Back button in top right
@@ -132,8 +164,6 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
                         .size(130.dp, 200.dp)
                         .background(Color((0xFFA7E8EB)), shape = RoundedCornerShape(8.dp))
                 ) {
-
-
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.TopStart
@@ -155,8 +185,6 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
                                     FavoritesManager.removeFavorite(bookId)
                                 }
                                 isFavorite = !isFavorite
-
-
                             },
                             modifier = Modifier.padding(4.dp)
                         ) {
@@ -226,31 +254,19 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
                 }
 
                 Button(
-                    onClick = {
-                        if (isLoanRequested) {
-                            deleteRequest = true
-                            isLoanRequested = false
-
-                            coroutineScope.launch {
-                                delay(2000)
-                                deleteRequest = false
-                            }
-                        } else {
-                            showLoanRequestDialog = true
-                            coroutineScope.launch {
-                                delay(2000)
-                                showLoanRequestDialog = false
-                                isLoanRequested = true
-                            }
-                        }
-                    },
+                    onClick = { toggleLoanRequest() },
                     colors = ButtonDefaults.buttonColors(
-                        if (isLoanRequested) Color(0xFFFF9800) else Color(0xFF71F55E)
+                        // Set button color based on the availability status
+                        when (buttonText) {
+                            "requested" -> Color(0xFFFF9800) // Orange for "requested"
+                            "not available" -> Color.Red // Red for "not available"
+                            else -> Color(0xFF71F55E) // Green for "available"
+                        }
                     )
                 ) {
                     Text(
-                        text = if (isLoanRequested) "requested" else "available",
-                        color = if (isLoanRequested) Color.White else Color.Black
+                        text = buttonText,
+                        color = if (buttonText == "requested" || buttonText == "not available") Color.White else Color.Black
                     )
                 }
 
@@ -339,6 +355,7 @@ fun BookDetails(navController: NavController, authViewModel: AuthViewModel,) {
                 }
             }
         }
+
 
 
         // Contact Owner Dialog

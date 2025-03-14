@@ -169,7 +169,6 @@ fun HomePage(modifier: Modifier = Modifier, navController: NavController, authVi
                 IconButton(onClick = {
                     showNotificationPopup = true
                     if (unreadNotifications > 0) {
-                        // Reset unread count when viewing notifications
                         unreadNotifications = 0
                     }
                 }) {
