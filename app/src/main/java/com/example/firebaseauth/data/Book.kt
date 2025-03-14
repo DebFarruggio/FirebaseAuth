@@ -1,6 +1,7 @@
 package com.example.firebaseauth.data
 
 data class Book(
+    val id: String = "",
     val title: String = "",
     val titleLower: String = "",
     val author: String = "",

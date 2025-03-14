@@ -208,9 +208,10 @@ fun addDataToFirebase(
     //save the currentUser
     val currentUser = FirebaseAuth.getInstance().currentUser
     val titleLower = title.lowercase()
+    val doc = dbCourses.document()
     //adding our data to our courses object class.
     Log.d("Utente", "Utente trovato: ${currentUser.toString()}")
-    val books = Book(title, titleLower, author, type, currentUser?.uid, currentUser?.email)
+    val books = Book(doc.id, title, titleLower, author, type, currentUser?.uid, currentUser?.email)
 
     //below method is use to add data to Firebase Firestore.
     dbCourses.add(books).addOnSuccessListener {
